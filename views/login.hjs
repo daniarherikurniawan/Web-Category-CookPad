@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>SimpleGram</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width">
+    <link href="stylesheets/bootstrap.min.css" rel="stylesheet">
+    <link href="stylesheets/style.css" rel="stylesheet">
+    <script src="/javascripts/jquery/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap/bootstrap.min.js"></script>
+    <link rel="shortcut icon" type="image/png" href="images/logo.jpg"/>
+  </head>
+      
+  <body>
+    <div class="row">
+      <div class="text-center">
+        <h3>SimpleGram</h3>
+        <form id="form_login" >
+          <label>Username:</label>
+          <input type="text" name="username" placeholder="Username">
+          <br>
+          <label>Password:</label>
+          <input type="password" name="password" placeholder="Password">
+          <br>
+          <a class="btn" href="/signup">Create Account</a>
+          <input type="submit" value="Login">
+        </form>
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<script type="text/javascript">
+  $( "#form_login" ).submit(function( event ) {
+    var http = new XMLHttpRequest();
+    http.open("POST", "/login", true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "username=" + window.encodeURIComponent($('[name=username]').val())+ 
+      "&password="+window.encodeURIComponent($('[name=password]').val());
+    http.send((params));
+    http.onload = function() {
+      responseText = jQuery.parseJSON(http.responseText)
+      if (responseText.status == "exist")
+        window.location.href = "/"
+      else
+        alert(responseText.message)
+    }
+    event.preventDefault();
+  });
+</script>
+
+<!-- script references -->
+<script src="/javascripts/page_scripting/login/login_script.js"></script>

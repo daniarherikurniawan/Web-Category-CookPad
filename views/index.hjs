@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>SimpleGram</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width">
+    <link href="stylesheets/bootstrap.min.css" rel="stylesheet">
+    <link href="stylesheets/style.css" rel="stylesheet">
+    <script src="/javascripts/jquery/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap/bootstrap.min.js"></script>
+    <link rel="shortcut icon" type="image/png" href="images/logo.jpg"/>
+  </head>
+      
+  <body>
+    <div class="row topNav">
+      <span class="col-md-6" style="text-align: left">
+        <a class="btn"  href="/user"><%profile.username%></a>
+      </span>
+      <span class="col-md-6" style="text-align: right">
+        <a class="btn"  href="/logout">Log out</a>
+      </span>
+    </div>
+
+    <div class="row">
+      <div class="text-center">
+
+        <div class="row">
+          <div class="col-md-3"></div>
+
+          <div onclick="triggerBrowseImage()" class="col-md-2" style=" border: #4bb4d3 1px solid; margin: 5px; cursor:pointer;">
+            <img src="" height="140" width="100%" alt="Image preview..." >
+          </div>
+
+          <div class="col-md-3">
+            <textarea class="" id="caption" rows="4" style="width: 100%;" placeholder="Write your image caption here .."></textarea>
+
+            <button class="btn btn-primary btn" onClick="triggerBrowseImage()" > 
+              <span class="glyphicon glyphicon-picture " ></span>&nbsp;&nbspChoose Image
+            </button>
+
+            <button class="btn btn-primary btn" onclick="submitPost()"> 
+              <span class="glyphicon glyphicon-send" ></span>&nbsp;&nbspPost
+            </button>
+
+          </div>
+        </div>
+
+        <div>
+
+
+          <form name="upload" id="submitPicture" method="post" action="/post/upload_image"  enctype="multipart/form-data" style="width:0px" >
+            <input style="visibility:hidden"  onchange="previewFile()" name= "img_profile" type="file" id="imageToUpload">
+          </form>    
+
+        </div>
+
+        <div class="row">
+          <div class="col-md-3"></div>
+          <!-- time line -->
+          <div class="col-md-6">
+            <%# posts %>
+              <br>
+              <div class="row">
+                <div class="col-md-4" >
+                  <img src="/images/<%creator.username%>/posts/<%image_name%>" height="140" width="100%" alt="Image preview..." >
+                </div>
+
+                <div class="col-md-6" style="padding: 10px">
+                  <div class="row" style ="text-align: left">
+                    <img style=" width:40px;" src="/images/<%creator.username%>/profile/<%creator.img_profile_name%>">
+                    <span style="width: 100%;"><%creator.username%></span>
+                  </div>
+
+                  <%# original_creator %>
+                    <div class="row" style ="text-align: left">
+                      <span style="width: 100%;">This post was shared from: <%original_creator.username%></span>
+                    </div>
+                  <%/ original_creator %>
+
+                  <div class="row" style="text-align: left; padding: 10px 0px">
+                    <span style="width: 100%;"><%caption%></span>
+                    <br>
+                  </div>
+
+                  <div class="row" style="text-align: right">
+                    <%# myPost %>
+                      <button class="btn btn-danger btn" onClick="deletePost('<%_id%>')" > 
+                        <span class="glyphicon glyphicon-trash " ></span>
+                      </button>
+                    <%/ myPost %>
+
+                    <button id='button<%_id%>' class="btn btn-primary btn" onClick="showComments('<%_id%>')" > 
+                      <%comments.length%>&nbspComments
+                    </button>
+
+                    <button class="btn btn-primary btn" onclick="initiateShareId('<%_id%>')" data-toggle="modal" href="#shareModal"> 
+                      <span class="glyphicon glyphicon-share" ></span>&nbsp;&nbspShare
+                    </button>
+                  </div>
+                  <textarea class="" id="comment" name='<%_id%>' rows="2" style="width: 100%;" placeholder="Write your comment here and then press enter"></textarea>
+                  <div class="row" id="showComment<%_id%>"></div>
+                </div>
+              </div>
+            <%/ posts %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<script type="text/javascript">
+  var postBeingShared = undefined;
+  function initiateShareId(id){
+    postBeingShared = id;
+  }
+  
+  function previewFile(){
+       var preview = document.querySelector('img'); //selects the query named img
+       var file    = document.querySelector('input[type=file]').files[0]; //sames as here
+       var reader  = new FileReader();
+
+       reader.onloadend = function () {
+           preview.src = reader.result;
+       }
+
+       if (file) {
+           reader.readAsDataURL(file); //reads the data as a URL
+       } else {
+           preview.src = "";
+       }
+  }
+
+  previewFile(); 
+
+  function triggerBrowseImage() {
+    document.getElementById("imageToUpload").click();
+  }
+
+  function submitPost() {
+    fileInput = document.getElementById('imageToUpload');   
+    if(fileInput.files[0] != undefined){
+      image_name = fileInput.files[0].name;
+      var http = new XMLHttpRequest();
+      http.open("POST", "/post/create", true);
+      http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      var params = "caption=" + window.encodeURIComponent($('[id=caption]').val())+
+      "&image_name=" + window.encodeURIComponent(image_name);
+      http.send((params));
+      http.onload = function() {
+        $( "#submitPicture" ).submit();
+      }
+    }else{
+      alert("You should choose an image to be uploaded!")
+    }
+  }
+
+  function deletePost(id){
+    var http = new XMLHttpRequest();
+    http.open("POST", "/post/delete", true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "id=" + window.encodeURIComponent(id);
+    http.send((params));
+    http.onload = function() {
+      alert(http.responseText)
+      window.location.href = "/"
+    }
+  }
+
+  function sharePost(){
+    var http = new XMLHttpRequest();
+    http.open("POST", "/post/share", true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "id=" + window.encodeURIComponent(postBeingShared)+
+      "&caption=" + window.encodeURIComponent($('[id=additional_caption]').val());
+    http.send((params));
+    http.onload = function() {
+      alert(http.responseText)
+      window.location.href = "/"
+
+    }
+  }
+
+function hideComments(id2){
+ iddNew="showComment"+id2;
+ newOnClick2 = "showComments('"+id2+"')";
+ buttonOnClick = "#button"+id2;
+ $(buttonOnClick).attr("onClick", newOnClick2);
+ document.getElementById(iddNew).innerHTML ="";
+}
+
+
+function showComments(id3){
+    post_id = id3;
+    var http = new XMLHttpRequest();
+    http.open("POST", "/post/comments", true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "id=" + window.encodeURIComponent(id3);
+    http.send((params));
+    http.onload = function() {
+      if(http.responseText=="404"){
+          //error
+          alert(http.responseText);
+        }else{
+
+
+         comments = JSON.parse(http.responseText);
+          //build the comments div
+          newComments = "";
+          for ( i = 0;i <=  comments.length - 1; i++) {
+
+            newComments += 
+            "<div class=\"well\" style=\"word-wrap: break-word; padding:10px 15px 10px 15px; margin-bottom:0px\">\""+
+            comments[i].content+"\"~ by <b>"+comments[i].creator.username+"</b> </div> ";
+
+          };
+          // alert(newComments);
+          //put generated html to the div
+          buttonOnClick = "#button"+id3;
+          newOnClick = "hideComments('"+id3+"')";
+          $(buttonOnClick).attr("onClick", newOnClick);
+          idd="showComment"+id3;
+          document.getElementById(idd).innerHTML =newComments;
+        }
+
+        
+      }
+
+    }
+
+$(function() {
+  $('textarea#comment').on('keyup', function(e) {
+    if (e.which == 13 && ! e.shiftKey) {
+      var id = this.name;
+      var content = $(this).val();
+      if (content.length > 0){
+        var http = new XMLHttpRequest();
+        http.open("POST", "/post/add/comment", true);
+        http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        var params = "id=" + window.encodeURIComponent(id)
+           +"&content="+window.encodeURIComponent(content);
+
+           http.send((params));
+           // alert(params)
+           http.onload = function() {
+            if(http.responseText=="404"){
+              alert(http.responseText);
+            }else{
+              alert(http.responseText);
+              showComments(id);
+            }
+         }
+      }
+    }
+  });
+
+});
+
+
+</script>
+
+
+<div id="shareModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 style=" color: black; text-align: center; margin: 5px 0px 0px;">Share a Post </h4>
+      </div>
+      
+      <div class="well background_modal" style="padding: 15px; margin-bottom: 0px;"> 
+        <textarea id="additional_caption" class="form-control auto-resize" placeholder="What is your thought about this post?" required rows="2" style="height:60px; padding: 0px" id="additionalThought" ></textarea>
+
+        <div class="row" style="text-align: right;">
+          <button class="btn btn-primary btn"  data-dismiss="modal"> 
+            Cancel
+          </button>
+          <button class="btn btn-primary btn"  onclick="sharePost()"> 
+            <span class="glyphicon glyphicon-share" ></span>&nbsp;&nbspShare
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>SimpleGram</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width">
+    <link href="stylesheets/bootstrap.min.css" rel="stylesheet">
+    <link href="stylesheets/style.css" rel="stylesheet">
+    <script src="/javascripts/jquery/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap/bootstrap.min.js"></script>
+    <link rel="shortcut icon" type="image/png" href="images/logo.jpg"/>
+  </head>
+      
+  <body>
+    <div class="row">
+      <div class="text-center">
+        <h3>SimpleGram</h3>
+        <h5>Create Account</h5>
+        <form id="form_signup" >
+          <label>Username:</label>
+          <input type="text" name="username" placeholder="Username" required>
+          <br>
+          <label>Password:</label>
+          <input type="password" name="password" placeholder="Password" required>
+          <br>
+          <label></label>
+          <input type="password" name="password_rewrite" placeholder="Rewrite password" required>
+          <br>
+          <a class="btn" href="/login">Login</a>
+          <input type="submit" value="Create">
+        </form>
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<script type="text/javascript">
+  $( "#form_signup" ).submit(function( event ) {
+    var http = new XMLHttpRequest();
+    http.open("POST", "/signup", true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "username=" + window.encodeURIComponent($('[name=username]').val())+ 
+      "&password="+window.encodeURIComponent($('[name=password]').val())+ 
+      "&password_rewrite="+window.encodeURIComponent($('[name=password_rewrite]').val());
+    http.send((params));
+    http.onload = function() {
+      responseText = jQuery.parseJSON(http.responseText)
+      alert(responseText.message)
+      if (responseText.status == "success")
+        window.location.href = "/login"
+    }
+    event.preventDefault();
+  });
+</script>
+
+<!-- script references -->
+<!-- <script src="/javascripts/page_scripting/login/login_script.js"></script> -->
